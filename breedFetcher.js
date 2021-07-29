@@ -1,14 +1,23 @@
 const request = require('request');
 const userInput = process.argv[2];
 
-request('https://api.thecatapi.com/v1/breeds', function(error, response, body) {
-  console.error('error:', error);
-  const data = JSON.parse(body);
-
-  for (let i = 0; i < data.length; i++) {
-    if (data[i].name === userInput) {
-      return console.log(data[i].description);
-    }
+const fetchBreedDescription = function(breedName, callback) {
+  request('https://api.thecatapi.com/v1/breeds/search?q=' + userInput, function(error, response, body) {
+  if (error) {
+    callback('hello', null) 
+    return
   }
-  return console.log('Error!');
+  if (response.statusCode > 299) {
+    callback('hello', null)
+    return
+  }
+  const data = JSON.parse(body)
+  if (data.length === 0) {
+    callback('hello', null)
+    return
+  }
+  callback(null, data[0].description)
 });
+}
+
+module.exports = fetchBreedDescription;
